@@ -17,582 +17,48 @@ DEFAULT_AS_OF = date(2026, 3, 8)
 @st.cache_data
 def create_seed_data() -> pd.DataFrame:
     records = [
-        {
-            "Opportunity": "Amref - resubmitted",
-            "Category": "In Process",
-            "Status": "Through to next round",
-            "Lead": "Go",
-            "Partner / Sponsor": "Amref",
-            "Focus Area": "General",
-            "Submission Date": "2026-01-09",
-            "Deadline": "2026-02-28",
-            "Stage": "In Process",
-            "Funding Amount": 50000,
-            "Funding Currency": "USD",
-            "Notes": "Through to next round.",
-        },
-        {
-            "Opportunity": "EDCTP Global collaboration action",
-            "Category": "In Process",
-            "Status": "In process",
-            "Lead": "FV",
-            "Partner / Sponsor": "EDCTP / Utrecht / Heidelberg / Amsterdam",
-            "Focus Area": "HIV / Comorbidity",
-            "Submission Date": None,
-            "Deadline": "2026-03-04",
-            "Stage": "Stage 1 Submission",
-            "Funding Amount": 5000000,
-            "Funding Currency": "EUR",
-            "Notes": "Two-stage application.",
-        },
-        {
-            "Opportunity": "Three other EDCTP opportunities",
-            "Category": "In Process",
-            "Status": "In process",
-            "Lead": "Various",
-            "Partner / Sponsor": "EDCTP",
-            "Focus Area": "HIV / Cannabis / Comorbidity",
-            "Submission Date": None,
-            "Deadline": "2026-03-04",
-            "Stage": "In Process",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Cannabis, HIV cure, comorbidity.",
-        },
-        {
-            "Opportunity": "NIH R21/33: RISE",
-            "Category": "In Process",
-            "Status": "Due soon",
-            "Lead": "Nicola Bulled / Wits",
-            "Partner / Sponsor": "NIH / UMass",
-            "Focus Area": "HIV / Comorbidity",
-            "Submission Date": None,
-            "Deadline": "2026-03-15",
-            "Stage": "Proposal Development",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Low-resource urban communities in South Africa.",
-        },
-        {
-            "Opportunity": "Wellcome Discovery 2",
-            "Category": "In Process",
-            "Status": "Review discussion ongoing",
-            "Lead": "FV / Jen / Suman",
-            "Partner / Sponsor": "Wellcome",
-            "Focus Area": "Research",
-            "Submission Date": None,
-            "Deadline": "2026-03-31",
-            "Stage": "Review / Rework",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Review meeting completed.",
-        },
-        {
-            "Opportunity": "Wellcome Discovery 1 Reloaded",
-            "Category": "In Process",
-            "Status": "Concept submitted",
-            "Lead": "FV / Jenn / Holly",
-            "Partner / Sponsor": "Wellcome",
-            "Focus Area": "Research",
-            "Submission Date": None,
-            "Deadline": "2026-07-31",
-            "Stage": "Concept / Reapply",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "July 2026 target round.",
-        },
-        {
-            "Opportunity": "Wellcome Clinical Trials",
-            "Category": "In Process",
-            "Status": "Call expected",
-            "Lead": "FV",
-            "Partner / Sponsor": "Wellcome",
-            "Focus Area": "Clinical Trials",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Watchlist",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Possible generic Sema study.",
-        },
-        {
-            "Opportunity": "CHAI Len/CAB switch/naive",
-            "Category": "In Process",
-            "Status": "Concept circulated",
-            "Lead": "FV",
-            "Partner / Sponsor": "CHAI / Gates",
-            "Focus Area": "Len / HIV",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Concept",
-            "Funding Amount": 3000000,
-            "Funding Currency": "USD",
-            "Notes": "Additional $2m may be needed.",
-        },
-        {
-            "Opportunity": "Novo obesity trials opportunity",
-            "Category": "In Process",
-            "Status": "Concept to be written",
-            "Lead": "Tarryn / Alison",
-            "Partner / Sponsor": "Novo",
-            "Focus Area": "Obesity",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Concept",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Investigator-led studies.",
-        },
-        {
-            "Opportunity": "Chinese Pharmaceutical",
-            "Category": "In Process",
-            "Status": "Unfunded for now",
-            "Lead": "Francois / Simiso",
-            "Partner / Sponsor": "Chinese Pharmaceutical",
-            "Focus Area": "Pharma",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Early Discussion",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Roger Bedimo wants to chat.",
-        },
-        {
-            "Opportunity": "London Growth Capital / Baby Trump",
-            "Category": "In Process",
-            "Status": "Monitoring",
-            "Lead": "Nkuli",
-            "Partner / Sponsor": "London Growth Capital",
-            "Focus Area": "Sepsis",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Watchlist",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Probably not a fit.",
-        },
-        {
-            "Opportunity": "Merck CRO / Oncology HIV study",
-            "Category": "In Process",
-            "Status": "Looking into it",
-            "Lead": "Nkuli",
-            "Partner / Sponsor": "Merck",
-            "Focus Area": "Oncology / HIV",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Early Review",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Review underway.",
-        },
-        {
-            "Opportunity": "Eli Lilly diabetes and obesity projects",
-            "Category": "In Process",
-            "Status": "Follow-up required",
-            "Lead": "Nkuli",
-            "Partner / Sponsor": "Eli Lilly",
-            "Focus Area": "Diabetes / Obesity",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Follow-up",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Further viability check needed.",
-        },
-        {
-            "Opportunity": "Sema/Cagril Pharma study",
-            "Category": "In Process",
-            "Status": "Contract coming",
-            "Lead": "Simiso",
-            "Partner / Sponsor": "Pharma",
-            "Focus Area": "Sema / Cagril",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Contracting",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "15–20 participants.",
-        },
-        {
-            "Opportunity": "FHI 360 long-acting prevention",
-            "Category": "In Process",
-            "Status": "Follow-up needed",
-            "Lead": "Francois / Hally / Chris",
-            "Partner / Sponsor": "FHI 360",
-            "Focus Area": "Prevention",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Follow-up",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Meeting follow-up required.",
-        },
-        {
-            "Opportunity": "EDCTP - PK, Reg Ethics capacity",
-            "Category": "In Process",
-            "Status": "Likely August submission",
-            "Lead": "Nkuli",
-            "Partner / Sponsor": "EDCTP / NEPAD",
-            "Focus Area": "Capacity Building",
-            "Submission Date": None,
-            "Deadline": "2026-08-15",
-            "Stage": "Planning",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "1-stage application.",
-        },
-        {
-            "Opportunity": "Phoenix group quotes",
-            "Category": "In Process",
-            "Status": "None presently",
-            "Lead": "Mo",
-            "Partner / Sponsor": "Phoenix Group",
-            "Focus Area": "Quotes",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Dormant",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Discuss with Mo.",
-        },
-        {
-            "Opportunity": "University of British Columbia - small application",
-            "Category": "In Process",
-            "Status": "Submitted on our behalf",
-            "Lead": "Nkuli / Jamie Forrest",
-            "Partner / Sponsor": "University of British Columbia",
-            "Focus Area": "Academic",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Submitted",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Small application.",
-        },
-        {
-            "Opportunity": "MISP - opti dor",
-            "Category": "In Process",
-            "Status": "In process",
-            "Lead": "Unknown",
-            "Partner / Sponsor": "MISP",
-            "Focus Area": "MISP",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "In Process",
-            "Funding Amount": 1000000,
-            "Funding Currency": "USD",
-            "Notes": "Approx $1m.",
-        },
-        {
-            "Opportunity": "Gates Grand Challenges - AI decision support",
-            "Category": "New Opportunity",
-            "Status": "For consideration",
-            "Lead": "TBD",
-            "Partner / Sponsor": "Gates",
-            "Focus Area": "AI / Primary Care",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "New Opportunity",
-            "Funding Amount": 3000000,
-            "Funding Currency": "USD",
-            "Notes": "Pathway A and B available.",
-        },
-        {
-            "Opportunity": "Leeds-Wits Horizons platform",
-            "Category": "New Opportunity",
-            "Status": "For consideration",
-            "Lead": "TBD",
-            "Partner / Sponsor": "Leeds-Wits",
-            "Focus Area": "Climate and Health",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "New Opportunity",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Three small opportunities.",
-        },
-        {
-            "Opportunity": "GACD 11th funding round - Joint Process",
-            "Category": "New Opportunity",
-            "Status": "Suggested go",
-            "Lead": "Sam",
-            "Partner / Sponsor": "GACD",
-            "Focus Area": "Multisectoral approaches",
-            "Submission Date": None,
-            "Deadline": "2026-06-17",
-            "Stage": "New Opportunity",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Use Healthy Jozi phase 1 learnings.",
-        },
-        {
-            "Opportunity": "UK MRC partnership grant",
-            "Category": "New Opportunity",
-            "Status": "Co-lead only",
-            "Lead": "TBD",
-            "Partner / Sponsor": "UK MRC",
-            "Focus Area": "Research Grant",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "New Opportunity",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Rolling submission.",
-        },
-        {
-            "Opportunity": "UK MRC research grant",
-            "Category": "New Opportunity",
-            "Status": "Co-lead only",
-            "Lead": "TBD",
-            "Partner / Sponsor": "UK MRC",
-            "Focus Area": "Research Grant",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "New Opportunity",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Rolling submission.",
-        },
-        {
-            "Opportunity": "PATH opportunities with Kim",
-            "Category": "New Opportunity",
-            "Status": "Email discussion",
-            "Lead": "Mo",
-            "Partner / Sponsor": "PATH",
-            "Focus Area": "Len / Dx / Pharmacy Health",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "New Opportunity",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Discussion ongoing.",
-        },
-        {
-            "Opportunity": "5FC - Jeremy Nel",
-            "Category": "New Opportunity",
-            "Status": "Explore as EzCRO",
-            "Lead": "Nkuli",
-            "Partner / Sponsor": "5FC",
-            "Focus Area": "EzCRO",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "New Opportunity",
-            "Funding Amount": 300000,
-            "Funding Currency": "ZAR",
-            "Notes": "R300,000 opportunity.",
-        },
-        {
-            "Opportunity": "PICASSO 2 for Len",
-            "Category": "New Opportunity",
-            "Status": "For consideration",
-            "Lead": "Francois / Simiso",
-            "Partner / Sponsor": "PICASSO 2",
-            "Focus Area": "Len",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "New Opportunity",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "For Len.",
-        },
-        {
-            "Opportunity": "GES Labs cannabis work",
-            "Category": "New Opportunity",
-            "Status": "Next step call",
-            "Lead": "TBD",
-            "Partner / Sponsor": "GES Labs",
-            "Focus Area": "Cannabis",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "New Opportunity",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Call with Peter Nel and team.",
-        },
-        {
-            "Opportunity": "Wellcome early career award",
-            "Category": "Submitted - Awaiting Decision",
-            "Status": "Awaiting decision",
-            "Lead": "Spha",
-            "Partner / Sponsor": "Wellcome",
-            "Focus Area": "Early Career",
-            "Submission Date": "2026-02-16",
-            "Deadline": None,
-            "Stage": "Submitted",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Awaiting decision.",
-        },
-        {
-            "Opportunity": "Multiplex/Diagnostics Unitaid",
-            "Category": "Submitted - Awaiting Decision",
-            "Status": "Submitted",
-            "Lead": "Ezintsha / PSI",
-            "Partner / Sponsor": "Unitaid",
-            "Focus Area": "Diagnostics",
-            "Submission Date": "2026-01-29",
-            "Deadline": None,
-            "Stage": "Submitted",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Ezintsha prime, PSI support.",
-        },
-        {
-            "Opportunity": "BioEquivalence Morphine Sulphate Oral products",
-            "Category": "Submitted - Awaiting Decision",
-            "Status": "Budget submitted",
-            "Lead": "TBD",
-            "Partner / Sponsor": "Unknown",
-            "Focus Area": "Bioequivalence",
-            "Submission Date": "2026-01-19",
-            "Deadline": None,
-            "Stage": "Submitted",
-            "Funding Amount": 500000,
-            "Funding Currency": "USD",
-            "Notes": "Approx $500,000.",
-        },
-        {
-            "Opportunity": "Merck MISP Sleep",
-            "Category": "Submitted - Awaiting Decision",
-            "Status": "Review comments addressed",
-            "Lead": "Tarryn",
-            "Partner / Sponsor": "Merck",
-            "Focus Area": "Sleep",
-            "Submission Date": "2025-11-17",
-            "Deadline": None,
-            "Stage": "Submitted",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Reviewer comments addressed.",
-        },
-        {
-            "Opportunity": "Open Society Foundations - IMITHI concept",
-            "Category": "Submitted - Awaiting Decision",
-            "Status": "Waiting on OSF",
-            "Lead": "Nkuli",
-            "Partner / Sponsor": "Open Society Foundations",
-            "Focus Area": "IMITHI",
-            "Submission Date": "2025-10-15",
-            "Deadline": None,
-            "Stage": "Submitted",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Tricky sell.",
-        },
-        {
-            "Opportunity": "SA MRC SIR grant - iHEART follow up",
-            "Category": "Submitted - Awaiting Decision",
-            "Status": "Awaiting decision",
-            "Lead": "Spha",
-            "Partner / Sponsor": "SA MRC",
-            "Focus Area": "iHEART",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Submitted",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Follow up.",
-        },
-        {
-            "Opportunity": "University of British Columbia - small application",
-            "Category": "Submitted - Awaiting Decision",
-            "Status": "Submitted on our behalf",
-            "Lead": "Jamie Forrest",
-            "Partner / Sponsor": "University of British Columbia",
-            "Focus Area": "Academic",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Submitted",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Small application.",
-        },
-        {
-            "Opportunity": "Talisman 2/IMPRESS",
-            "Category": "Recent Decision",
-            "Status": "Not successful",
-            "Lead": "Sam",
-            "Partner / Sponsor": "Unknown",
-            "Focus Area": "Research",
-            "Submission Date": "2025-09-16",
-            "Deadline": None,
-            "Stage": "Decision",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Not successful.",
-        },
-        {
-            "Opportunity": "HERO vaccine work",
-            "Category": "Recent Decision",
-            "Status": "Cancelled",
-            "Lead": "Simiso",
-            "Partner / Sponsor": "NIH",
-            "Focus Area": "Vaccine",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Decision",
-            "Funding Amount": 20000,
-            "Funding Currency": "USD",
-            "Notes": "Funding withdrawn.",
-        },
-        {
-            "Opportunity": "COMBAT Trial",
-            "Category": "Recent Decision",
-            "Status": "Not successful",
-            "Lead": "Unknown",
-            "Partner / Sponsor": "Unknown",
-            "Focus Area": "Clinical Trial",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Decision",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Not successful.",
-        },
-        {
-            "Opportunity": "Gilead INCLUSION",
-            "Category": "Recent Decision",
-            "Status": "No go",
-            "Lead": "PSI",
-            "Partner / Sponsor": "Gilead",
-            "Focus Area": "Inclusion",
-            "Submission Date": "2026-01-30",
-            "Deadline": None,
-            "Stage": "Decision",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "Budget small, drug unavailable.",
-        },
-        {
-            "Opportunity": "ANRS",
-            "Category": "Recent Decision",
-            "Status": "Not successful",
-            "Lead": "FV / Tarryn",
-            "Partner / Sponsor": "ANRS",
-            "Focus Area": "Research",
-            "Submission Date": "2025-09-15",
-            "Deadline": None,
-            "Stage": "Decision",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "To discuss.",
-        },
-        {
-            "Opportunity": "HBNU Fogarty Global Health Fellowship",
-            "Category": "Recent Decision",
-            "Status": "Not successful",
-            "Lead": "Spha / Sam",
-            "Partner / Sponsor": "Fogarty",
-            "Focus Area": "Global Health Fellowship",
-            "Submission Date": None,
-            "Deadline": None,
-            "Stage": "Decision",
-            "Funding Amount": None,
-            "Funding Currency": "Unknown",
-            "Notes": "May repurpose concept.",
-        },
+        {"Opportunity": "Amref - resubmitted", "Category": "In Process", "Status": "Through to next round", "Lead": "Go", "Partner / Sponsor": "Amref", "Focus Area": "General", "Submission Date": "2026-01-09", "Deadline": "2026-02-28", "Stage": "In Process", "Funding Amount": 50000, "Funding Currency": "USD", "Notes": "Through to next round."},
+        {"Opportunity": "EDCTP Global collaboration action", "Category": "In Process", "Status": "In process", "Lead": "FV", "Partner / Sponsor": "EDCTP / Utrecht / Heidelberg / Amsterdam", "Focus Area": "HIV / Comorbidity", "Submission Date": None, "Deadline": "2026-03-04", "Stage": "Stage 1 Submission", "Funding Amount": 5000000, "Funding Currency": "EUR", "Notes": "Two-stage application."},
+        {"Opportunity": "Three other EDCTP opportunities", "Category": "In Process", "Status": "In process", "Lead": "Various", "Partner / Sponsor": "EDCTP", "Focus Area": "HIV / Cannabis / Comorbidity", "Submission Date": None, "Deadline": "2026-03-04", "Stage": "In Process", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Cannabis, HIV cure, comorbidity."},
+        {"Opportunity": "NIH R21/33: RISE", "Category": "In Process", "Status": "Due soon", "Lead": "Nicola Bulled / Wits", "Partner / Sponsor": "NIH / UMass", "Focus Area": "HIV / Comorbidity", "Submission Date": None, "Deadline": "2026-03-15", "Stage": "Proposal Development", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Low-resource urban communities in South Africa."},
+        {"Opportunity": "Wellcome Discovery 2", "Category": "In Process", "Status": "Review discussion ongoing", "Lead": "FV / Jen / Suman", "Partner / Sponsor": "Wellcome", "Focus Area": "Research", "Submission Date": None, "Deadline": "2026-03-31", "Stage": "Review / Rework", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Review meeting completed."},
+        {"Opportunity": "Wellcome Discovery 1 Reloaded", "Category": "In Process", "Status": "Concept submitted", "Lead": "FV / Jenn / Holly", "Partner / Sponsor": "Wellcome", "Focus Area": "Research", "Submission Date": None, "Deadline": "2026-07-31", "Stage": "Concept / Reapply", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "July 2026 target round."},
+        {"Opportunity": "Wellcome Clinical Trials", "Category": "In Process", "Status": "Call expected", "Lead": "FV", "Partner / Sponsor": "Wellcome", "Focus Area": "Clinical Trials", "Submission Date": None, "Deadline": None, "Stage": "Watchlist", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Possible generic Sema study."},
+        {"Opportunity": "CHAI Len/CAB switch/naive", "Category": "In Process", "Status": "Concept circulated", "Lead": "FV", "Partner / Sponsor": "CHAI / Gates", "Focus Area": "Len / HIV", "Submission Date": None, "Deadline": None, "Stage": "Concept", "Funding Amount": 3000000, "Funding Currency": "USD", "Notes": "Additional $2m may be needed."},
+        {"Opportunity": "Novo obesity trials opportunity", "Category": "In Process", "Status": "Concept to be written", "Lead": "Tarryn / Alison", "Partner / Sponsor": "Novo", "Focus Area": "Obesity", "Submission Date": None, "Deadline": None, "Stage": "Concept", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Investigator-led studies."},
+        {"Opportunity": "Chinese Pharmaceutical", "Category": "In Process", "Status": "Unfunded for now", "Lead": "Francois / Simiso", "Partner / Sponsor": "Chinese Pharmaceutical", "Focus Area": "Pharma", "Submission Date": None, "Deadline": None, "Stage": "Early Discussion", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Roger Bedimo wants to chat."},
+        {"Opportunity": "London Growth Capital / Baby Trump", "Category": "In Process", "Status": "Monitoring", "Lead": "Nkuli", "Partner / Sponsor": "London Growth Capital", "Focus Area": "Sepsis", "Submission Date": None, "Deadline": None, "Stage": "Watchlist", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Probably not a fit."},
+        {"Opportunity": "Merck CRO / Oncology HIV study", "Category": "In Process", "Status": "Looking into it", "Lead": "Nkuli", "Partner / Sponsor": "Merck", "Focus Area": "Oncology / HIV", "Submission Date": None, "Deadline": None, "Stage": "Early Review", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Review underway."},
+        {"Opportunity": "Eli Lilly diabetes and obesity projects", "Category": "In Process", "Status": "Follow-up required", "Lead": "Nkuli", "Partner / Sponsor": "Eli Lilly", "Focus Area": "Diabetes / Obesity", "Submission Date": None, "Deadline": None, "Stage": "Follow-up", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Further viability check needed."},
+        {"Opportunity": "Sema/Cagril Pharma study", "Category": "In Process", "Status": "Contract coming", "Lead": "Simiso", "Partner / Sponsor": "Pharma", "Focus Area": "Sema / Cagril", "Submission Date": None, "Deadline": None, "Stage": "Contracting", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "15–20 participants."},
+        {"Opportunity": "FHI 360 long-acting prevention", "Category": "In Process", "Status": "Follow-up needed", "Lead": "Francois / Hally / Chris", "Partner / Sponsor": "FHI 360", "Focus Area": "Prevention", "Submission Date": None, "Deadline": None, "Stage": "Follow-up", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Meeting follow-up required."},
+        {"Opportunity": "EDCTP - PK, Reg Ethics capacity", "Category": "In Process", "Status": "Likely August submission", "Lead": "Nkuli", "Partner / Sponsor": "EDCTP / NEPAD", "Focus Area": "Capacity Building", "Submission Date": None, "Deadline": "2026-08-15", "Stage": "Planning", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "1-stage application."},
+        {"Opportunity": "Phoenix group quotes", "Category": "In Process", "Status": "None presently", "Lead": "Mo", "Partner / Sponsor": "Phoenix Group", "Focus Area": "Quotes", "Submission Date": None, "Deadline": None, "Stage": "Dormant", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Discuss with Mo."},
+        {"Opportunity": "University of British Columbia - small application", "Category": "In Process", "Status": "Submitted on our behalf", "Lead": "Nkuli / Jamie Forrest", "Partner / Sponsor": "University of British Columbia", "Focus Area": "Academic", "Submission Date": None, "Deadline": None, "Stage": "Submitted", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Small application."},
+        {"Opportunity": "MISP - opti dor", "Category": "In Process", "Status": "In process", "Lead": "Unknown", "Partner / Sponsor": "MISP", "Focus Area": "MISP", "Submission Date": None, "Deadline": None, "Stage": "In Process", "Funding Amount": 1000000, "Funding Currency": "USD", "Notes": "Approx $1m."},
+        {"Opportunity": "Gates Grand Challenges - AI decision support", "Category": "New Opportunity", "Status": "For consideration", "Lead": "TBD", "Partner / Sponsor": "Gates", "Focus Area": "AI / Primary Care", "Submission Date": None, "Deadline": None, "Stage": "New Opportunity", "Funding Amount": 3000000, "Funding Currency": "USD", "Notes": "Pathway A and B available."},
+        {"Opportunity": "Leeds-Wits Horizons platform", "Category": "New Opportunity", "Status": "For consideration", "Lead": "TBD", "Partner / Sponsor": "Leeds-Wits", "Focus Area": "Climate and Health", "Submission Date": None, "Deadline": None, "Stage": "New Opportunity", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Three small opportunities."},
+        {"Opportunity": "GACD 11th funding round - Joint Process", "Category": "New Opportunity", "Status": "Suggested go", "Lead": "Sam", "Partner / Sponsor": "GACD", "Focus Area": "Multisectoral approaches", "Submission Date": None, "Deadline": "2026-06-17", "Stage": "New Opportunity", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Use Healthy Jozi phase 1 learnings."},
+        {"Opportunity": "UK MRC partnership grant", "Category": "New Opportunity", "Status": "Co-lead only", "Lead": "TBD", "Partner / Sponsor": "UK MRC", "Focus Area": "Research Grant", "Submission Date": None, "Deadline": None, "Stage": "New Opportunity", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Rolling submission."},
+        {"Opportunity": "UK MRC research grant", "Category": "New Opportunity", "Status": "Co-lead only", "Lead": "TBD", "Partner / Sponsor": "UK MRC", "Focus Area": "Research Grant", "Submission Date": None, "Deadline": None, "Stage": "New Opportunity", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Rolling submission."},
+        {"Opportunity": "PATH opportunities with Kim", "Category": "New Opportunity", "Status": "Email discussion", "Lead": "Mo", "Partner / Sponsor": "PATH", "Focus Area": "Len / Dx / Pharmacy Health", "Submission Date": None, "Deadline": None, "Stage": "New Opportunity", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Discussion ongoing."},
+        {"Opportunity": "5FC - Jeremy Nel", "Category": "New Opportunity", "Status": "Explore as EzCRO", "Lead": "Nkuli", "Partner / Sponsor": "5FC", "Focus Area": "EzCRO", "Submission Date": None, "Deadline": None, "Stage": "New Opportunity", "Funding Amount": 300000, "Funding Currency": "ZAR", "Notes": "R300,000 opportunity."},
+        {"Opportunity": "PICASSO 2 for Len", "Category": "New Opportunity", "Status": "For consideration", "Lead": "Francois / Simiso", "Partner / Sponsor": "PICASSO 2", "Focus Area": "Len", "Submission Date": None, "Deadline": None, "Stage": "New Opportunity", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "For Len."},
+        {"Opportunity": "GES Labs cannabis work", "Category": "New Opportunity", "Status": "Next step call", "Lead": "TBD", "Partner / Sponsor": "GES Labs", "Focus Area": "Cannabis", "Submission Date": None, "Deadline": None, "Stage": "New Opportunity", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Call with Peter Nel and team."},
+        {"Opportunity": "Wellcome early career award", "Category": "Submitted - Awaiting Decision", "Status": "Awaiting decision", "Lead": "Spha", "Partner / Sponsor": "Wellcome", "Focus Area": "Early Career", "Submission Date": "2026-02-16", "Deadline": None, "Stage": "Submitted", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Awaiting decision."},
+        {"Opportunity": "Multiplex/Diagnostics Unitaid", "Category": "Submitted - Awaiting Decision", "Status": "Submitted", "Lead": "Ezintsha / PSI", "Partner / Sponsor": "Unitaid", "Focus Area": "Diagnostics", "Submission Date": "2026-01-29", "Deadline": None, "Stage": "Submitted", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Ezintsha prime, PSI support."},
+        {"Opportunity": "BioEquivalence Morphine Sulphate Oral products", "Category": "Submitted - Awaiting Decision", "Status": "Budget submitted", "Lead": "TBD", "Partner / Sponsor": "Unknown", "Focus Area": "Bioequivalence", "Submission Date": "2026-01-19", "Deadline": None, "Stage": "Submitted", "Funding Amount": 500000, "Funding Currency": "USD", "Notes": "Approx $500,000."},
+        {"Opportunity": "Merck MISP Sleep", "Category": "Submitted - Awaiting Decision", "Status": "Review comments addressed", "Lead": "Tarryn", "Partner / Sponsor": "Merck", "Focus Area": "Sleep", "Submission Date": "2025-11-17", "Deadline": None, "Stage": "Submitted", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Reviewer comments addressed."},
+        {"Opportunity": "Open Society Foundations - IMITHI concept", "Category": "Submitted - Awaiting Decision", "Status": "Waiting on OSF", "Lead": "Nkuli", "Partner / Sponsor": "Open Society Foundations", "Focus Area": "IMITHI", "Submission Date": "2025-10-15", "Deadline": None, "Stage": "Submitted", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Tricky sell."},
+        {"Opportunity": "SA MRC SIR grant - iHEART follow up", "Category": "Submitted - Awaiting Decision", "Status": "Awaiting decision", "Lead": "Spha", "Partner / Sponsor": "SA MRC", "Focus Area": "iHEART", "Submission Date": None, "Deadline": None, "Stage": "Submitted", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Follow up."},
+        {"Opportunity": "University of British Columbia - small application", "Category": "Submitted - Awaiting Decision", "Status": "Submitted on our behalf", "Lead": "Jamie Forrest", "Partner / Sponsor": "University of British Columbia", "Focus Area": "Academic", "Submission Date": None, "Deadline": None, "Stage": "Submitted", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Small application."},
+        {"Opportunity": "Talisman 2/IMPRESS", "Category": "Recent Decision", "Status": "Not successful", "Lead": "Sam", "Partner / Sponsor": "Unknown", "Focus Area": "Research", "Submission Date": "2025-09-16", "Deadline": None, "Stage": "Decision", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Not successful."},
+        {"Opportunity": "HERO vaccine work", "Category": "Recent Decision", "Status": "Cancelled", "Lead": "Simiso", "Partner / Sponsor": "NIH", "Focus Area": "Vaccine", "Submission Date": None, "Deadline": None, "Stage": "Decision", "Funding Amount": 20000, "Funding Currency": "USD", "Notes": "Funding withdrawn."},
+        {"Opportunity": "COMBAT Trial", "Category": "Recent Decision", "Status": "Not successful", "Lead": "Unknown", "Partner / Sponsor": "Unknown", "Focus Area": "Clinical Trial", "Submission Date": None, "Deadline": None, "Stage": "Decision", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Not successful."},
+        {"Opportunity": "Gilead INCLUSION", "Category": "Recent Decision", "Status": "No go", "Lead": "PSI", "Partner / Sponsor": "Gilead", "Focus Area": "Inclusion", "Submission Date": "2026-01-30", "Deadline": None, "Stage": "Decision", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "Budget small, drug unavailable."},
+        {"Opportunity": "ANRS", "Category": "Recent Decision", "Status": "Not successful", "Lead": "FV / Tarryn", "Partner / Sponsor": "ANRS", "Focus Area": "Research", "Submission Date": "2025-09-15", "Deadline": None, "Stage": "Decision", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "To discuss."},
+        {"Opportunity": "HBNU Fogarty Global Health Fellowship", "Category": "Recent Decision", "Status": "Not successful", "Lead": "Spha / Sam", "Partner / Sponsor": "Fogarty", "Focus Area": "Global Health Fellowship", "Submission Date": None, "Deadline": None, "Stage": "Decision", "Funding Amount": None, "Funding Currency": "Unknown", "Notes": "May repurpose concept."},
     ]
-
     df = pd.DataFrame(records)
     df["Submission Date"] = pd.to_datetime(df["Submission Date"], errors="coerce")
     df["Deadline"] = pd.to_datetime(df["Deadline"], errors="coerce")
@@ -634,6 +100,18 @@ def deadline_tone(days):
     return "positive"
 
 
+def urgency_group(days):
+    if pd.isna(days):
+        return "No deadline"
+    if days < 0:
+        return "Overdue"
+    if days <= 7:
+        return "Due in 7 days"
+    if days <= 30:
+        return "Due in 30 days"
+    return "Safe"
+
+
 def badge(text: str, tone: str = "neutral") -> str:
     colors = {
         "positive": ("#DCFCE7", "#166534"),
@@ -668,7 +146,39 @@ def add_display_columns(df: pd.DataFrame, as_of_ts: pd.Timestamp) -> pd.DataFram
     )
     out["Status Tone"] = out["Status"].apply(status_tone)
     out["Deadline Tone"] = out["Days to Deadline"].apply(deadline_tone)
+    out["Urgency Group"] = out["Days to Deadline"].apply(urgency_group)
     return out
+
+
+def styled_bar(data, y_field, x_field, title, color="#0F62FE", height=300):
+    base = alt.Chart(data).encode(
+        y=alt.Y(f"{y_field}:N", sort="-x", title=None),
+        x=alt.X(f"{x_field}:Q", title=None),
+        tooltip=[y_field, x_field],
+    )
+    bars = base.mark_bar(cornerRadiusTopRight=8, cornerRadiusBottomRight=8, color=color)
+    labels = base.mark_text(
+        align="left", baseline="middle", dx=6, fontWeight="bold", color="#0f172a"
+    ).encode(text=f"{x_field}:Q")
+    return (bars + labels).properties(title=title, height=height)
+
+
+def styled_column(data, x_field, y_field, title, color="#14B8A6", height=320):
+    base = alt.Chart(data).encode(
+        x=alt.X(f"{x_field}:N", sort=None, title=None),
+        y=alt.Y(f"{y_field}:Q", title=None),
+        tooltip=[x_field, y_field],
+    )
+    bars = base.mark_bar(cornerRadiusTopLeft=8, cornerRadiusTopRight=8, color=color)
+    labels = base.mark_text(dy=-10, fontWeight="bold", color="#0f172a").encode(text=f"{y_field}:Q")
+    return (bars + labels).properties(title=title, height=height)
+
+
+def category_color_scale():
+    return alt.Scale(
+        domain=["In Process", "New Opportunity", "Submitted - Awaiting Decision", "Recent Decision"],
+        range=["#2563EB", "#14B8A6", "#F59E0B", "#DC2626"],
+    )
 
 
 st.markdown(
@@ -678,40 +188,72 @@ st.markdown(
         --line: #E6EBF4;
         --shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
     }
+
     .stApp {
         background: radial-gradient(circle at top left, #f8fbff 0%, #f6f8fc 35%, #f6f8fc 100%);
     }
-    .block-container {
-        padding-top: 1rem;
-        padding-bottom: 2rem;
-        max-width: 1480px;
+
+    header[data-testid="stHeader"] {
+        display: none;
     }
+
+    [data-testid="stToolbar"] {
+        display: none;
+    }
+
+    [data-testid="collapsedControl"] {
+        display: none;
+    }
+
+    #MainMenu {
+        visibility: hidden;
+    }
+
+    footer {
+        visibility: hidden;
+    }
+
+    .block-container {
+        padding-top: 1.1rem;
+        padding-bottom: 2rem;
+        padding-left: 2rem;
+        padding-right: 2rem;
+        max-width: 1580px;
+    }
+
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
         border-right: 1px solid rgba(255,255,255,0.06);
     }
+
     [data-testid="stSidebar"] * {
         color: #f8fafc !important;
     }
+
     .hero {
-        padding: 22px 24px;
-        border-radius: 24px;
+        padding: 28px 30px;
+        border-radius: 28px;
         background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 55%, #14b8a6 100%);
         color: white;
         box-shadow: 0 18px 40px rgba(29, 78, 216, 0.18);
-        margin-bottom: 1rem;
+        margin-top: 0.1rem;
+        margin-bottom: 1.2rem;
     }
+
     .hero h1 {
         margin: 0;
-        font-size: 2rem;
-        line-height: 1.1;
+        font-size: 2.2rem;
+        line-height: 1.08;
         color: white;
     }
+
     .hero p {
-        margin: 8px 0 0 0;
+        margin: 10px 0 0 0;
         color: rgba(255,255,255,0.88);
-        max-width: 780px;
+        max-width: 820px;
+        font-size: 1rem;
     }
+
     .card {
         background: white;
         border: 1px solid var(--line);
@@ -719,6 +261,7 @@ st.markdown(
         padding: 18px;
         box-shadow: var(--shadow);
     }
+
     .mini-card {
         background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
         border: 1px solid var(--line);
@@ -727,17 +270,52 @@ st.markdown(
         box-shadow: var(--shadow);
         min-height: 150px;
     }
+
     .section-title {
-        font-size: 1.05rem;
+        font-size: 1.08rem;
         font-weight: 800;
         margin-bottom: 8px;
         color: #0f172a;
     }
+
     .toolbar-note {
         color: #64748b;
-        font-size: 0.9rem;
+        font-size: 0.92rem;
         padding-top: 8px;
     }
+
+    .priority-shell {
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 18px;
+        box-shadow: var(--shadow);
+        margin-top: 0.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .priority-title {
+        font-size: 1.12rem;
+        font-weight: 900;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    .priority-sub {
+        color: #64748b;
+        font-size: 0.92rem;
+        margin-bottom: 12px;
+    }
+
+    .urgency-box {
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 18px;
+        box-shadow: var(--shadow);
+        margin-top: 0.5rem;
+    }
+
     div[data-testid="stMetric"] {
         background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
         border: 1px solid var(--line);
@@ -745,28 +323,34 @@ st.markdown(
         padding: 14px;
         box-shadow: var(--shadow);
     }
+
     div[data-testid="stMetricLabel"] {
         font-weight: 700;
         color: #334155;
     }
+
     div[data-testid="stDataFrame"] {
         border: 1px solid var(--line);
         border-radius: 18px;
         overflow: hidden;
         box-shadow: var(--shadow);
     }
+
     .quick-list-item {
         padding: 10px 0;
         border-bottom: 1px solid #eef2f7;
     }
+
     .quick-list-item:last-child {
         border-bottom: none;
     }
+
     .quick-title {
         font-weight: 700;
         color: #0f172a;
         margin-bottom: 2px;
     }
+
     .quick-meta {
         color: #64748b;
         font-size: 0.9rem;
@@ -782,7 +366,7 @@ st.markdown(
         <div style="display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap;">
             <div>
                 <h1>Leads & Opportunities</h1>
-                <p>Executive portfolio view for funding pipeline, sponsors, deadlines, and follow-up actions.</p>
+                <p>Funding pipeline, sponsors, deadlines, and actions in one executive view.</p>
             </div>
             <div style="text-align:right;min-width:220px;">
                 <div style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.75;">Tracker updated</div>
@@ -825,6 +409,8 @@ if source == "Upload CSV":
             df["Funding Currency"] = "Unknown"
         if "Notes" not in df.columns:
             df["Notes"] = ""
+        if "Stage" not in df.columns:
+            df["Stage"] = ""
     else:
         st.info("No file uploaded yet. Seeded data is displayed.")
         df = create_seed_data()
@@ -991,42 +577,105 @@ with quick3:
     ) or "<div class='quick-meta'>No flagged actions.</div>"
     st.markdown(f"<div class='mini-card'><div class='section-title'>Action list</div>{items}</div>", unsafe_allow_html=True)
 
+priority_df = filtered[
+    filtered["Urgency Group"].isin(["Overdue", "Due in 7 days", "Due in 30 days"])
+].copy()
 
-def styled_bar(data, y_field, x_field, title, color="#0F62FE", height=300):
-    base = alt.Chart(data).encode(
-        y=alt.Y(f"{y_field}:N", sort="-x", title=None),
-        x=alt.X(f"{x_field}:Q", title=None),
-        tooltip=[y_field, x_field],
-    )
-    bars = base.mark_bar(cornerRadiusTopRight=8, cornerRadiusBottomRight=8, color=color)
-    labels = base.mark_text(
-        align="left", baseline="middle", dx=6, fontWeight="bold", color="#0f172a"
-    ).encode(text=f"{x_field}:Q")
-    return (bars + labels).properties(title=title, height=height)
+st.markdown(
+    """
+    <div class="priority-shell">
+        <div class="priority-title">Urgent projects requiring action</div>
+        <div class="priority-sub">Projects are shown directly here so leadership can immediately see what needs attention.</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
+priority_left, priority_right = st.columns([1.15, 0.85])
 
-def styled_column(data, x_field, y_field, title, color="#14B8A6", height=320):
-    base = alt.Chart(data).encode(
-        x=alt.X(f"{x_field}:N", sort=None, title=None),
-        y=alt.Y(f"{y_field}:Q", title=None),
-        tooltip=[x_field, y_field],
-    )
-    bars = base.mark_bar(cornerRadiusTopLeft=8, cornerRadiusTopRight=8, color=color)
-    labels = base.mark_text(dy=-10, fontWeight="bold", color="#0f172a").encode(text=f"{y_field}:Q")
-    return (bars + labels).properties(title=title, height=height)
-
-
-def category_color_scale():
-    return alt.Scale(
-        domain=[
-            "In Process",
-            "New Opportunity",
-            "Submitted - Awaiting Decision",
-            "Recent Decision",
-        ],
-        range=["#2563EB", "#14B8A6", "#F59E0B", "#DC2626"],
+with priority_left:
+    priority_choice = st.selectbox(
+        "Priority view",
+        ["All urgent", "Overdue", "Due in 7 days", "Due in 30 days"],
+        index=0,
     )
 
+    if priority_choice == "All urgent":
+        priority_view = priority_df.copy()
+    else:
+        priority_view = priority_df[priority_df["Urgency Group"] == priority_choice].copy()
+
+    priority_cols = [
+        "Opportunity",
+        "Lead",
+        "Partner / Sponsor",
+        "Deadline",
+        "Days to Deadline",
+        "Urgency Group",
+        "Status",
+        "Funding Display",
+    ]
+
+    if priority_view.empty:
+        st.success("No urgent projects in the current filtered view.")
+    else:
+        st.dataframe(
+            priority_view[priority_cols].sort_values(
+                ["Days to Deadline", "Opportunity"],
+                ascending=[True, True],
+                na_position="last",
+            ),
+            width="stretch",
+            hide_index=True,
+        )
+
+with priority_right:
+    priority_counts = (
+        priority_df.groupby("Urgency Group", as_index=False)
+        .size()
+        .rename(columns={"size": "Count"})
+    )
+
+    priority_order = ["Overdue", "Due in 7 days", "Due in 30 days"]
+
+    priority_counts = (
+        pd.DataFrame({"Urgency Group": priority_order})
+        .merge(priority_counts, on="Urgency Group", how="left")
+        .fillna({"Count": 0})
+    )
+    priority_counts["Count"] = priority_counts["Count"].astype(int)
+
+    priority_chart = alt.Chart(priority_counts).mark_bar(
+        cornerRadiusTopLeft=8,
+        cornerRadiusTopRight=8,
+    ).encode(
+        x=alt.X("Urgency Group:N", sort=priority_order, title=None),
+        y=alt.Y("Count:Q", title=None),
+        color=alt.Color(
+            "Urgency Group:N",
+            scale=alt.Scale(
+                domain=priority_order,
+                range=["#DC2626", "#F97316", "#F59E0B"],
+            ),
+            legend=None,
+        ),
+        tooltip=["Urgency Group", "Count"],
+    )
+
+    priority_text = alt.Chart(priority_counts).mark_text(
+        dy=-10,
+        fontWeight="bold",
+        color="#0f172a",
+    ).encode(
+        x=alt.X("Urgency Group:N", sort=priority_order),
+        y=alt.Y("Count:Q"),
+        text="Count:Q",
+    )
+
+    st.altair_chart(
+        (priority_chart + priority_text).properties(title="Priority summary", height=280),
+        width="stretch",
+    )
 
 st.markdown("### Portfolio analytics")
 
@@ -1102,6 +751,7 @@ with tab2:
         "Funding Display",
         "Status",
     ]
+
     deadline_df = filtered[filtered["Deadline"].notna()].copy()
     left_dead, right_dead = st.columns([1.2, 1])
 
@@ -1112,9 +762,18 @@ with tab2:
                 .size()
                 .rename(columns={"size": "Count"})
             )
-            deadline_summary = deadline_summary.rename(columns={deadline_summary.columns[0]: "Deadline Label"})
+            deadline_summary = deadline_summary.rename(
+                columns={deadline_summary.columns[0]: "Deadline Label"}
+            )
             st.altair_chart(
-                styled_column(deadline_summary, "Deadline Label", "Count", "Deadline volume", color="#F59E0B", height=330),
+                styled_column(
+                    deadline_summary,
+                    "Deadline Label",
+                    "Count",
+                    "Deadline volume",
+                    color="#F59E0B",
+                    height=330,
+                ),
                 width="stretch",
             )
         else:
@@ -1127,6 +786,97 @@ with tab2:
             st.dataframe(deadline_view, width="stretch", hide_index=True)
         else:
             st.info("No upcoming deadlines.")
+
+    st.markdown(
+        """
+        <div class="urgency-box">
+            <div class="section-title">Urgency breakdown</div>
+            <div class="toolbar-note">Use the selector below to display the exact projects in each urgency group.</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    urgency_order = ["Overdue", "Due in 7 days", "Due in 30 days", "Safe", "No deadline"]
+
+    urgency_df = (
+        filtered.groupby("Urgency Group", as_index=False)
+        .size()
+        .rename(columns={"size": "Count"})
+    )
+
+    urgency_df = (
+        pd.DataFrame({"Urgency Group": urgency_order})
+        .merge(urgency_df, on="Urgency Group", how="left")
+        .fillna({"Count": 0})
+    )
+    urgency_df["Count"] = urgency_df["Count"].astype(int)
+
+    urgency_chart = alt.Chart(urgency_df).mark_bar(
+        cornerRadiusTopLeft=8,
+        cornerRadiusTopRight=8
+    ).encode(
+        x=alt.X("Urgency Group:N", sort=urgency_order, title=None),
+        y=alt.Y("Count:Q", title=None),
+        color=alt.Color(
+            "Urgency Group:N",
+            scale=alt.Scale(
+                domain=urgency_order,
+                range=["#DC2626", "#F97316", "#F59E0B", "#16A34A", "#94A3B8"],
+            ),
+            legend=None,
+        ),
+        tooltip=["Urgency Group", "Count"],
+    )
+
+    urgency_text = alt.Chart(urgency_df).mark_text(
+        dy=-10,
+        fontWeight="bold",
+        color="#0f172a"
+    ).encode(
+        x=alt.X("Urgency Group:N", sort=urgency_order),
+        y=alt.Y("Count:Q"),
+        text="Count:Q",
+    )
+
+    st.altair_chart(
+        (urgency_chart + urgency_text).properties(title="Urgency", height=300),
+        width="stretch",
+    )
+
+    urgency_choice = st.selectbox(
+        "Show projects by urgency",
+        ["All"] + urgency_order,
+        index=0,
+    )
+
+    if urgency_choice == "All":
+        urgency_view = filtered.copy()
+    else:
+        urgency_view = filtered[filtered["Urgency Group"] == urgency_choice].copy()
+
+    urgency_cols = [
+        "Opportunity",
+        "Lead",
+        "Partner / Sponsor",
+        "Deadline",
+        "Days to Deadline",
+        "Urgency Group",
+        "Status",
+        "Funding Display",
+    ]
+
+    st.markdown("#### Projects in selected urgency group")
+
+    st.dataframe(
+        urgency_view[urgency_cols].sort_values(
+            ["Days to Deadline", "Opportunity"],
+            ascending=[True, True],
+            na_position="last",
+        ),
+        width="stretch",
+        hide_index=True,
+    )
 
 with tab3:
     st.markdown("#### Portfolio table")
@@ -1152,6 +902,7 @@ with tab3:
     chosen = st.selectbox("Open opportunity", ["Select an opportunity"] + filtered["Opportunity"].tolist())
     if chosen != "Select an opportunity":
         row = filtered[filtered["Opportunity"] == chosen].iloc[0]
+
         d1, d2 = st.columns([1, 1])
 
         with d1:
