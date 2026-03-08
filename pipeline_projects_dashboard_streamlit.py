@@ -16,8 +16,7 @@ st.set_page_config(
 TRACKER_UPDATED = pd.Timestamp("2026-02-24")
 DEFAULT_AS_OF = date(2026, 3, 8)
 
-EXCEL_PATH = r"C:\Users\BonganiSenyolo\OneDrive - Wits Health Consortium\Ezintsha PC\Downloads\app\projects_tracker_master.xlsx"
-SHEET_NAME = "Projects"
+EXCEL_PATH = "projects_tracker_master.xlsx"
 
 st_autorefresh(interval=15000, key="dashboard_refresh")
 
