@@ -4,16 +4,16 @@ import altair as alt
 from datetime import date
 
 st.set_page_config(
-    page_title="Leads & Opportunities Dashboard",
+    page_title="Leads & Opportunities",
     page_icon="📌",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
+TRACKER_UPDATED = pd.Timestamp("2026-02-24")
+DEFAULT_AS_OF = date(2026, 3, 8)
 
-# ---------------------------------
-# Seed data
-# ---------------------------------
+
 @st.cache_data
 def create_seed_data() -> pd.DataFrame:
     records = [
@@ -596,15 +596,10 @@ def create_seed_data() -> pd.DataFrame:
     df = pd.DataFrame(records)
     df["Submission Date"] = pd.to_datetime(df["Submission Date"], errors="coerce")
     df["Deadline"] = pd.to_datetime(df["Deadline"], errors="coerce")
-    today = pd.Timestamp(date.today())
-    df["Days to Deadline"] = (df["Deadline"] - today).dt.days
     df["Funding Amount"] = pd.to_numeric(df["Funding Amount"], errors="coerce")
     return df
 
 
-# ---------------------------------
-# Helpers
-# ---------------------------------
 def fmt_money(amount: float, currency: str) -> str:
     if pd.isna(amount):
         return "Not stated"
@@ -627,7 +622,7 @@ def status_tone(status: str) -> str:
     return "neutral"
 
 
-def deadline_tone(days) -> str:
+def deadline_tone(days):
     if pd.isna(days):
         return "neutral"
     if days < 0:
@@ -639,9 +634,27 @@ def deadline_tone(days) -> str:
     return "positive"
 
 
-def add_display_columns(df: pd.DataFrame) -> pd.DataFrame:
+def badge(text: str, tone: str = "neutral") -> str:
+    colors = {
+        "positive": ("#DCFCE7", "#166534"),
+        "warning": ("#FEF3C7", "#92400E"),
+        "negative": ("#FEE2E2", "#991B1B"),
+        "neutral": ("#E2E8F0", "#334155"),
+        "brand": ("#DBEAFE", "#1D4ED8"),
+    }
+    bg, fg = colors.get(tone, colors["neutral"])
+    return (
+        f"<span style='display:inline-block;padding:4px 10px;border-radius:999px;"
+        f"background:{bg};color:{fg};font-size:12px;font-weight:700;'>{text}</span>"
+    )
+
+
+def add_display_columns(df: pd.DataFrame, as_of_ts: pd.Timestamp) -> pd.DataFrame:
     out = df.copy()
-    out["Funding Display"] = out.apply(lambda r: fmt_money(r["Funding Amount"], r["Funding Currency"]), axis=1)
+    out["Days to Deadline"] = (out["Deadline"] - as_of_ts).dt.days
+    out["Funding Display"] = out.apply(
+        lambda r: fmt_money(r["Funding Amount"], r["Funding Currency"]), axis=1
+    )
     out["Deadline Status"] = out["Days to Deadline"].apply(
         lambda x: "No deadline"
         if pd.isna(x)
@@ -658,48 +671,15 @@ def add_display_columns(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def badge(text: str, tone: str = "neutral") -> str:
-    colors = {
-        "positive": ("#DCFCE7", "#166534"),
-        "warning": ("#FEF3C7", "#92400E"),
-        "negative": ("#FEE2E2", "#991B1B"),
-        "neutral": ("#E2E8F0", "#334155"),
-        "brand": ("#DBEAFE", "#1D4ED8"),
-    }
-    bg, fg = colors.get(tone, colors["neutral"])
-    return f"<span style='display:inline-block;padding:4px 10px;border-radius:999px;background:{bg};color:{fg};font-size:12px;font-weight:700;'>{text}</span>"
-
-
-def metric_delta_label(count: int) -> str:
-    if count == 0:
-        return "Clear"
-    if count == 1:
-        return "1 item"
-    return f"{count} items"
-
-
-# ---------------------------------
-# Styles
-# ---------------------------------
 st.markdown(
     """
     <style>
     :root {
-        --bg: #F6F8FC;
-        --card: #FFFFFF;
         --line: #E6EBF4;
-        --text: #111827;
-        --muted: #667085;
-        --brand: #0F62FE;
-        --brand-2: #14B8A6;
-        --warn: #F59E0B;
-        --danger: #DC2626;
-        --success: #16A34A;
         --shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
     }
     .stApp {
         background: radial-gradient(circle at top left, #f8fbff 0%, #f6f8fc 35%, #f6f8fc 100%);
-        color: var(--text);
     }
     .block-container {
         padding-top: 1rem;
@@ -711,12 +691,6 @@ st.markdown(
         border-right: 1px solid rgba(255,255,255,0.06);
     }
     [data-testid="stSidebar"] * {
-        color: #f8fafc !important;
-    }
-    [data-testid="stSidebar"] .stMultiSelect div[data-baseweb="tag"] span,
-    [data-testid="stSidebar"] .stSelectbox label,
-    [data-testid="stSidebar"] .stCheckbox label,
-    [data-testid="stSidebar"] .stRadio label {
         color: #f8fafc !important;
     }
     .hero {
@@ -739,17 +713,17 @@ st.markdown(
         max-width: 780px;
     }
     .card {
-        background: var(--card);
+        background: white;
         border: 1px solid var(--line);
         border-radius: 22px;
-        padding: 18px 18px;
+        padding: 18px;
         box-shadow: var(--shadow);
     }
     .mini-card {
         background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
         border: 1px solid var(--line);
         border-radius: 20px;
-        padding: 16px 16px;
+        padding: 16px;
         box-shadow: var(--shadow);
         min-height: 150px;
     }
@@ -759,25 +733,21 @@ st.markdown(
         margin-bottom: 8px;
         color: #0f172a;
     }
-    .section-subtle {
+    .toolbar-note {
+        color: #64748b;
         font-size: 0.9rem;
-        color: var(--muted);
-        margin-top: 2px;
-        margin-bottom: 12px;
+        padding-top: 8px;
     }
     div[data-testid="stMetric"] {
         background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
         border: 1px solid var(--line);
         border-radius: 20px;
-        padding: 14px 14px;
+        padding: 14px;
         box-shadow: var(--shadow);
     }
     div[data-testid="stMetricLabel"] {
         font-weight: 700;
         color: #334155;
-    }
-    div[data-testid="stMetricValue"] {
-        font-weight: 800;
     }
     div[data-testid="stDataFrame"] {
         border: 1px solid var(--line);
@@ -801,30 +771,21 @@ st.markdown(
         color: #64748b;
         font-size: 0.9rem;
     }
-    .toolbar-note {
-        color: #64748b;
-        font-size: 0.9rem;
-        padding-top: 8px;
-    }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-
-# ---------------------------------
-# Header UI
-# ---------------------------------
 st.markdown(
     """
     <div class="hero">
         <div style="display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap;">
             <div>
                 <h1>Leads & Opportunities</h1>
-                <p>Commercial-grade portfolio view for executive decisions. Track pipeline momentum, funding potential, sponsors, deadlines, and follow-up actions in one place.</p>
+                <p>Executive portfolio view for funding pipeline, sponsors, deadlines, and follow-up actions.</p>
             </div>
-            <div style="text-align:right;min-width:180px;">
-                <div style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.75;">Portfolio Update</div>
+            <div style="text-align:right;min-width:220px;">
+                <div style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.75;">Tracker updated</div>
                 <div style="font-size:1.1rem;font-weight:800;">24 Feb 2026</div>
             </div>
         </div>
@@ -833,18 +794,19 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-toolbar_left, toolbar_mid, toolbar_right = st.columns([1.2, 1.6, 1])
+toolbar_left, toolbar_mid, toolbar_right, toolbar_date = st.columns([1.1, 1.8, 1.1, 1.1])
 with toolbar_left:
     view_mode = st.selectbox("View", ["Executive", "Detailed"], index=0)
 with toolbar_mid:
-    search = st.text_input("Search", placeholder="Search opportunity, sponsor, lead, focus area")
+    search = st.text_input("Search", placeholder="Opportunity, sponsor, lead, focus area")
 with toolbar_right:
-    sort_mode = st.selectbox("Sort portfolio", ["Deadline", "Funding", "Category", "Lead"], index=0)
+    sort_mode = st.selectbox("Sort", ["Deadline", "Funding", "Category", "Lead"], index=0)
+with toolbar_date:
+    as_of_date = st.date_input("As of date", value=DEFAULT_AS_OF)
 
+as_of_ts = pd.Timestamp(as_of_date)
+st.caption(f"As of date: {as_of_ts.date()} | Tracker last updated: {TRACKER_UPDATED.date()}")
 
-# ---------------------------------
-# Load data
-# ---------------------------------
 st.sidebar.title("Portfolio Filters")
 source = st.sidebar.radio("Data source", ["Seeded February 2026 data", "Upload CSV"], index=0)
 
@@ -855,21 +817,22 @@ if source == "Upload CSV":
         for col in ["Submission Date", "Deadline"]:
             if col in df.columns:
                 df[col] = pd.to_datetime(df[col], errors="coerce")
-        if "Days to Deadline" not in df.columns and "Deadline" in df.columns:
-            today = pd.Timestamp(date.today())
-            df["Days to Deadline"] = (df["Deadline"] - today).dt.days
+        if "Funding Amount" in df.columns:
+            df["Funding Amount"] = pd.to_numeric(df["Funding Amount"], errors="coerce")
+        else:
+            df["Funding Amount"] = pd.NA
+        if "Funding Currency" not in df.columns:
+            df["Funding Currency"] = "Unknown"
+        if "Notes" not in df.columns:
+            df["Notes"] = ""
     else:
         st.info("No file uploaded yet. Seeded data is displayed.")
         df = create_seed_data()
 else:
     df = create_seed_data()
 
-df = add_display_columns(df)
+df = add_display_columns(df, as_of_ts)
 
-
-# ---------------------------------
-# Filters
-# ---------------------------------
 category_options = sorted(df["Category"].dropna().unique().tolist())
 focus_options = sorted(df["Focus Area"].dropna().unique().tolist())
 lead_options = sorted(df["Lead"].dropna().unique().tolist())
@@ -916,15 +879,12 @@ elif sort_mode == "Category":
 elif sort_mode == "Lead":
     filtered = filtered.sort_values(["Lead", "Deadline"], ascending=[True, True], na_position="last")
 
-
-# ---------------------------------
-# KPIs
-# ---------------------------------
 total_opps = len(filtered)
 in_process = int((filtered["Category"] == "In Process").sum())
 new_opps = int((filtered["Category"] == "New Opportunity").sum())
 awaiting = int((filtered["Category"] == "Submitted - Awaiting Decision").sum())
 recent_decisions = int((filtered["Category"] == "Recent Decision").sum())
+critical_7 = int(filtered["Days to Deadline"].between(0, 7, inclusive="both").sum())
 due_30 = int(filtered["Days to Deadline"].between(0, 30, inclusive="both").sum())
 known_funding = filtered["Funding Amount"].sum(min_count=1)
 
@@ -933,21 +893,24 @@ k1.metric("Total", total_opps)
 k2.metric("In Process", in_process)
 k3.metric("New", new_opps)
 k4.metric("Awaiting", awaiting)
-k5.metric("Recent Decisions", recent_decisions)
+k5.metric("Due in 7 Days", critical_7)
 k6.metric("Due in 30 Days", due_30)
 
 if pd.notna(known_funding):
-    st.caption(f"Known funding captured in current view: {fmt_money(known_funding, 'USD')}+ across mixed currencies")
+    st.caption(f"Known funding in current view: {fmt_money(known_funding, 'USD')}+ across mixed currencies")
 
-
-# ---------------------------------
-# Executive top row
-# ---------------------------------
-upcoming = filtered[filtered["Days to Deadline"].between(0, 30, inclusive="both")].sort_values("Deadline")
+upcoming = filtered[filtered["Days to Deadline"] >= 0].sort_values("Deadline")
 next_deadline_card = "None in current view"
 if not upcoming.empty:
     next_item = upcoming.iloc[0]
-    next_deadline_card = f"{next_item['Opportunity']} · {next_item['Deadline'].date()} · {int(next_item['Days to Deadline'])} days left"
+    next_deadline_card = (
+        f"{next_item['Opportunity']} · {next_item['Deadline'].date()} · "
+        f"{int(next_item['Days to Deadline'])} days left"
+    )
+
+overdue_count = int((filtered["Days to Deadline"] < 0).sum())
+safe_count = int((filtered["Days to Deadline"] > 30).sum())
+active_sponsors = filtered["Partner / Sponsor"].nunique()
 
 exec_left, exec_mid, exec_right = st.columns([1.2, 1, 1])
 with exec_left:
@@ -956,28 +919,27 @@ with exec_left:
         <div class="card">
             <div class="section-title">Next deadline</div>
             <div style="font-size:1.05rem;font-weight:800;color:#0f172a;line-height:1.35;">{next_deadline_card}</div>
-            <div class="toolbar-note">Fastest moving item in the current filtered view.</div>
+            <div class="toolbar-note">Calculated from the selected as-of date.</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 with exec_mid:
-    urgent_count = int(filtered[filtered["Days to Deadline"].between(0, 7, inclusive="both")].shape[0])
     st.markdown(
         f"""
         <div class="card">
             <div class="section-title">Urgency</div>
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
-                <div style="font-size:2rem;font-weight:900;color:#DC2626;">{urgent_count}</div>
-                <div>{badge(metric_delta_label(urgent_count), 'negative' if urgent_count else 'positive')}</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;"><span>Overdue</span><span>{badge(str(overdue_count), 'negative')}</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;"><span>Due in 7 days</span><span>{badge(str(critical_7), 'negative' if critical_7 else 'positive')}</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;"><span>Due in 30 days</span><span>{badge(str(due_30), 'warning' if due_30 else 'positive')}</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;"><span>Safe</span><span>{badge(str(safe_count), 'positive')}</span></div>
             </div>
-            <div class="toolbar-note">Opportunities due within 7 days.</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 with exec_right:
-    active_sponsors = filtered["Partner / Sponsor"].nunique()
     st.markdown(
         f"""
         <div class="card">
@@ -986,56 +948,60 @@ with exec_right:
                 <div style="font-size:2rem;font-weight:900;color:#0F62FE;">{active_sponsors}</div>
                 <div>{badge('Active sponsors', 'brand')}</div>
             </div>
-            <div class="toolbar-note">Unique sponsors or partners visible in current filters.</div>
+            <div class="toolbar-note">Unique sponsors or partners in current filters.</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-
-# ---------------------------------
-# Quick action cards
-# ---------------------------------
 quick1, quick2, quick3 = st.columns(3)
 
 with quick1:
     high_value = filtered[filtered["Funding Amount"].notna()].sort_values("Funding Amount", ascending=False).head(5)
-    items = "".join([
-        f"<div class='quick-list-item'><div class='quick-title'>{r['Opportunity']}</div><div class='quick-meta'>{r['Funding Display']}</div></div>"
-        for _, r in high_value.iterrows()
-    ]) or "<div class='quick-meta'>No funding values.</div>"
+    items = "".join(
+        [
+            f"<div class='quick-list-item'><div class='quick-title'>{r['Opportunity']}</div>"
+            f"<div class='quick-meta'>{r['Funding Display']}</div></div>"
+            for _, r in high_value.iterrows()
+        ]
+    ) or "<div class='quick-meta'>No funding values.</div>"
     st.markdown(f"<div class='mini-card'><div class='section-title'>Top value</div>{items}</div>", unsafe_allow_html=True)
 
 with quick2:
     urgent = filtered[filtered["Days to Deadline"].between(0, 30, inclusive="both")].sort_values("Deadline").head(5)
-    items = "".join([
-        f"<div class='quick-list-item'><div class='quick-title'>{r['Opportunity']}</div><div class='quick-meta'>{int(r['Days to Deadline'])} days · {r['Deadline'].date()}</div></div>"
-        for _, r in urgent.iterrows()
-    ]) or "<div class='quick-meta'>No urgent deadlines.</div>"
+    items = "".join(
+        [
+            f"<div class='quick-list-item'><div class='quick-title'>{r['Opportunity']}</div>"
+            f"<div class='quick-meta'>{int(r['Days to Deadline'])} days · {r['Deadline'].date()}</div></div>"
+            for _, r in urgent.iterrows()
+        ]
+    ) or "<div class='quick-meta'>No urgent deadlines.</div>"
     st.markdown(f"<div class='mini-card'><div class='section-title'>Due soon</div>{items}</div>", unsafe_allow_html=True)
 
 with quick3:
     action_needed = filtered[
         filtered["Status"].str.contains("follow|review|discussion|looking|awaiting|tricky", case=False, na=False)
     ].head(5)
-    items = "".join([
-        f"<div class='quick-list-item'><div class='quick-title'>{r['Opportunity']}</div><div class='quick-meta'>{r['Status']}</div></div>"
-        for _, r in action_needed.iterrows()
-    ]) or "<div class='quick-meta'>No flagged actions.</div>"
+    items = "".join(
+        [
+            f"<div class='quick-list-item'><div class='quick-title'>{r['Opportunity']}</div>"
+            f"<div class='quick-meta'>{r['Status']}</div></div>"
+            for _, r in action_needed.iterrows()
+        ]
+    ) or "<div class='quick-meta'>No flagged actions.</div>"
     st.markdown(f"<div class='mini-card'><div class='section-title'>Action list</div>{items}</div>", unsafe_allow_html=True)
 
 
-# ---------------------------------
-# Charts
-# ---------------------------------
 def styled_bar(data, y_field, x_field, title, color="#0F62FE", height=300):
     base = alt.Chart(data).encode(
-        y=alt.Y(f"{y_field}:N", sort='-x', title=None),
+        y=alt.Y(f"{y_field}:N", sort="-x", title=None),
         x=alt.X(f"{x_field}:Q", title=None),
         tooltip=[y_field, x_field],
     )
     bars = base.mark_bar(cornerRadiusTopRight=8, cornerRadiusBottomRight=8, color=color)
-    labels = base.mark_text(align="left", baseline="middle", dx=6, fontWeight="bold", color="#0f172a").encode(text=f"{x_field}:Q")
+    labels = base.mark_text(
+        align="left", baseline="middle", dx=6, fontWeight="bold", color="#0f172a"
+    ).encode(text=f"{x_field}:Q")
     return (bars + labels).properties(title=title, height=height)
 
 
@@ -1072,44 +1038,85 @@ with tab1:
     with chart1:
         cat_df = filtered.groupby("Category", as_index=False).size().rename(columns={"size": "Count"})
         cat_chart = alt.Chart(cat_df).mark_bar(cornerRadiusTopRight=8, cornerRadiusBottomRight=8).encode(
-            y=alt.Y("Category:N", sort='-x', title=None),
+            y=alt.Y("Category:N", sort="-x", title=None),
             x=alt.X("Count:Q", title=None),
             color=alt.Color("Category:N", scale=category_color_scale(), legend=None),
             tooltip=["Category", "Count"],
         )
         cat_text = alt.Chart(cat_df).mark_text(align="left", baseline="middle", dx=6, fontWeight="bold").encode(
-            y=alt.Y("Category:N", sort='-x', title=None),
+            y=alt.Y("Category:N", sort="-x", title=None),
             x=alt.X("Count:Q", title=None),
             text="Count:Q",
         )
         st.altair_chart((cat_chart + cat_text).properties(title="By category", height=290), width="stretch")
 
     with chart2:
-        focus_df = filtered.groupby("Focus Area", as_index=False).size().rename(columns={"size": "Count"}).sort_values("Count", ascending=False).head(10)
-        st.altair_chart(styled_bar(focus_df, "Focus Area", "Count", "Top focus areas", color="#14B8A6", height=290), width="stretch")
+        focus_df = (
+            filtered.groupby("Focus Area", as_index=False)
+            .size()
+            .rename(columns={"size": "Count"})
+            .sort_values("Count", ascending=False)
+            .head(10)
+        )
+        st.altair_chart(
+            styled_bar(focus_df, "Focus Area", "Count", "Top focus areas", color="#14B8A6", height=290),
+            width="stretch",
+        )
 
     chart3, chart4 = st.columns(2)
 
     with chart3:
-        sponsor_df = filtered.groupby("Partner / Sponsor", as_index=False).size().rename(columns={"size": "Count"}).sort_values("Count", ascending=False).head(10)
-        st.altair_chart(styled_bar(sponsor_df, "Partner / Sponsor", "Count", "Top sponsors / partners", color="#0F62FE", height=330), width="stretch")
+        sponsor_df = (
+            filtered.groupby("Partner / Sponsor", as_index=False)
+            .size()
+            .rename(columns={"size": "Count"})
+            .sort_values("Count", ascending=False)
+            .head(10)
+        )
+        st.altair_chart(
+            styled_bar(sponsor_df, "Partner / Sponsor", "Count", "Top sponsors / partners", color="#0F62FE", height=330),
+            width="stretch",
+        )
 
     with chart4:
-        lead_df = filtered.groupby("Lead", as_index=False).size().rename(columns={"size": "Count"}).sort_values("Count", ascending=False).head(10)
-        st.altair_chart(styled_bar(lead_df, "Lead", "Count", "Top leads", color="#7C3AED", height=330), width="stretch")
+        lead_df = (
+            filtered.groupby("Lead", as_index=False)
+            .size()
+            .rename(columns={"size": "Count"})
+            .sort_values("Count", ascending=False)
+            .head(10)
+        )
+        st.altair_chart(
+            styled_bar(lead_df, "Lead", "Count", "Top leads", color="#7C3AED", height=330),
+            width="stretch",
+        )
 
 with tab2:
     upcoming_cols = [
-        "Opportunity", "Category", "Lead", "Partner / Sponsor", "Deadline", "Days to Deadline", "Funding Display", "Status"
+        "Opportunity",
+        "Category",
+        "Lead",
+        "Partner / Sponsor",
+        "Deadline",
+        "Days to Deadline",
+        "Funding Display",
+        "Status",
     ]
     deadline_df = filtered[filtered["Deadline"].notna()].copy()
     left_dead, right_dead = st.columns([1.2, 1])
 
     with left_dead:
         if not deadline_df.empty:
-            deadline_summary = deadline_df.groupby(deadline_df["Deadline"].dt.strftime("%d %b %Y"), as_index=False).size().rename(columns={"size": "Count"})
+            deadline_summary = (
+                deadline_df.groupby(deadline_df["Deadline"].dt.strftime("%d %b %Y"), as_index=False)
+                .size()
+                .rename(columns={"size": "Count"})
+            )
             deadline_summary = deadline_summary.rename(columns={deadline_summary.columns[0]: "Deadline Label"})
-            st.altair_chart(styled_column(deadline_summary, "Deadline Label", "Count", "Deadline volume", color="#F59E0B", height=330), width="stretch")
+            st.altair_chart(
+                styled_column(deadline_summary, "Deadline Label", "Count", "Deadline volume", color="#F59E0B", height=330),
+                width="stretch",
+            )
         else:
             st.info("No deadline data.")
 
@@ -1119,14 +1126,24 @@ with tab2:
             deadline_view = upcoming[upcoming_cols].copy()
             st.dataframe(deadline_view, width="stretch", hide_index=True)
         else:
-            st.info("No deadlines in the next 30 days.")
+            st.info("No upcoming deadlines.")
 
 with tab3:
     st.markdown("#### Portfolio table")
 
     detail_cols = [
-        "Opportunity", "Category", "Stage", "Status", "Lead", "Partner / Sponsor", "Focus Area",
-        "Submission Date", "Deadline", "Days to Deadline", "Funding Display", "Notes"
+        "Opportunity",
+        "Category",
+        "Stage",
+        "Status",
+        "Lead",
+        "Partner / Sponsor",
+        "Focus Area",
+        "Submission Date",
+        "Deadline",
+        "Days to Deadline",
+        "Funding Display",
+        "Notes",
     ]
     display_df = filtered[detail_cols].copy()
     st.dataframe(display_df, width="stretch", hide_index=True)
@@ -1136,13 +1153,20 @@ with tab3:
     if chosen != "Select an opportunity":
         row = filtered[filtered["Opportunity"] == chosen].iloc[0]
         d1, d2 = st.columns([1, 1])
+
         with d1:
             st.markdown(f"### {row['Opportunity']}")
-            st.markdown(f"{badge(row['Category'], 'brand')} {badge(row['Status'], row['Status Tone'])} {badge(row['Deadline Status'], row['Deadline Tone'])}", unsafe_allow_html=True)
+            st.markdown(
+                f"{badge(row['Category'], 'brand')} "
+                f"{badge(row['Status'], row['Status Tone'])} "
+                f"{badge(row['Deadline Status'], row['Deadline Tone'])}",
+                unsafe_allow_html=True,
+            )
             st.write(f"**Lead:** {row['Lead']}")
             st.write(f"**Partner / Sponsor:** {row['Partner / Sponsor']}")
             st.write(f"**Focus Area:** {row['Focus Area']}")
             st.write(f"**Stage:** {row['Stage']}")
+
         with d2:
             st.write(f"**Submission Date:** {row['Submission Date']}")
             st.write(f"**Deadline:** {row['Deadline']}")
@@ -1150,15 +1174,12 @@ with tab3:
             st.write(f"**Funding:** {row['Funding Display']}")
             st.write(f"**Notes:** {row['Notes']}")
 
-
-# ---------------------------------
-# Export
-# ---------------------------------
 st.markdown("### Export")
 export_df = filtered.copy()
 export_df["Submission Date"] = export_df["Submission Date"].astype(str)
 export_df["Deadline"] = export_df["Deadline"].astype(str)
 csv = export_df.to_csv(index=False).encode("utf-8")
+
 st.download_button(
     "Download current view",
     data=csv,
@@ -1166,26 +1187,22 @@ st.download_button(
     mime="text/csv",
 )
 
-
-# ---------------------------------
-# Guidance
-# ---------------------------------
 with st.expander("How to connect this to a live tracker"):
     st.markdown(
         """
-        Use a CSV or Excel export with columns similar to:
-        - Opportunity
-        - Category
-        - Status
-        - Lead
-        - Partner / Sponsor
-        - Focus Area
-        - Submission Date
-        - Deadline
-        - Funding Amount
-        - Funding Currency
-        - Notes
+Use a CSV or Excel export with columns similar to:
+- Opportunity
+- Category
+- Status
+- Lead
+- Partner / Sponsor
+- Focus Area
+- Submission Date
+- Deadline
+- Funding Amount
+- Funding Currency
+- Notes
 
-        This app can then be connected to a live source such as SharePoint, OneDrive, SQL, or a scheduled export.
-        """
+This app can be connected to a live source such as SharePoint, OneDrive, SQL, or a scheduled export.
+"""
     )
