@@ -1,3 +1,22 @@
+# import os
+# from datetime import date, datetime
+
+# import altair as alt
+# import pandas as pd
+# import streamlit as st
+# from streamlit_autorefresh import st_autorefresh
+
+# st.set_page_config(
+#     page_title="Leads & Opportunities",
+#     page_icon="📌",
+#     layout="wide",
+#     initial_sidebar_state="expanded",
+# )
+
+# TRACKER_UPDATED = pd.Timestamp("2026-02-24")
+# DEFAULT_AS_OF = date(2026, 3, 8)
+
+# EXCEL_PATH = "projects_tracker_master.xlsx"
 import os
 from datetime import date, datetime
 
@@ -17,6 +36,7 @@ TRACKER_UPDATED = pd.Timestamp("2026-02-24")
 DEFAULT_AS_OF = date(2026, 3, 8)
 
 EXCEL_PATH = "projects_tracker_master.xlsx"
+SHEET_NAME = "Projects"
 
 st_autorefresh(interval=15000, key="dashboard_refresh")
 
