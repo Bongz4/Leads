@@ -66,6 +66,28 @@ def create_seed_data() -> pd.DataFrame:
     return df
 
 
+def prepare_uploaded_df(uploaded_file) -> pd.DataFrame:
+    df = pd.read_csv(uploaded_file)
+    for col in ["Submission Date", "Deadline"]:
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col], errors="coerce")
+    if "Funding Amount" in df.columns:
+        df["Funding Amount"] = pd.to_numeric(df["Funding Amount"], errors="coerce")
+    else:
+        df["Funding Amount"] = pd.NA
+    if "Funding Currency" not in df.columns:
+        df["Funding Currency"] = "Unknown"
+    if "Notes" not in df.columns:
+        df["Notes"] = ""
+    if "Stage" not in df.columns:
+        df["Stage"] = ""
+    if "Category" not in df.columns:
+        df["Category"] = "Uncategorized"
+    if "Status" not in df.columns:
+        df["Status"] = ""
+    return df
+
+
 def fmt_money(amount: float, currency: str) -> str:
     if pd.isna(amount):
         return "Not stated"
@@ -124,6 +146,26 @@ def badge(text: str, tone: str = "neutral") -> str:
     return (
         f"<span style='display:inline-block;padding:4px 10px;border-radius:999px;"
         f"background:{bg};color:{fg};font-size:12px;font-weight:700;'>{text}</span>"
+    )
+
+
+def is_submitted_row(row) -> bool:
+    status = str(row.get("Status", "")).strip().lower()
+    stage = str(row.get("Stage", "")).strip().lower()
+    category = str(row.get("Category", "")).strip().lower()
+
+    submitted_terms = [
+        "submitted",
+        "budget submitted",
+        "concept submitted",
+        "submitted on our behalf",
+        "through to next round",
+    ]
+
+    return (
+        any(term in status for term in submitted_terms)
+        or "submitted" in stage
+        or "submitted" in category
     )
 
 
@@ -394,29 +436,22 @@ st.caption(f"As of date: {as_of_ts.date()} | Tracker last updated: {TRACKER_UPDA
 st.sidebar.title("Portfolio Filters")
 source = st.sidebar.radio("Data source", ["Seeded February 2026 data", "Upload CSV"], index=0)
 
+if "dashboard_df" not in st.session_state:
+    st.session_state.dashboard_df = create_seed_data()
+
 if source == "Upload CSV":
     uploaded = st.sidebar.file_uploader("Upload CSV", type=["csv"])
     if uploaded is not None:
-        df = pd.read_csv(uploaded)
-        for col in ["Submission Date", "Deadline"]:
-            if col in df.columns:
-                df[col] = pd.to_datetime(df[col], errors="coerce")
-        if "Funding Amount" in df.columns:
-            df["Funding Amount"] = pd.to_numeric(df["Funding Amount"], errors="coerce")
-        else:
-            df["Funding Amount"] = pd.NA
-        if "Funding Currency" not in df.columns:
-            df["Funding Currency"] = "Unknown"
-        if "Notes" not in df.columns:
-            df["Notes"] = ""
-        if "Stage" not in df.columns:
-            df["Stage"] = ""
+        st.session_state.dashboard_df = prepare_uploaded_df(uploaded)
     else:
         st.info("No file uploaded yet. Seeded data is displayed.")
-        df = create_seed_data()
+        if st.session_state.dashboard_df.empty:
+            st.session_state.dashboard_df = create_seed_data()
 else:
-    df = create_seed_data()
+    if st.session_state.dashboard_df.empty:
+        st.session_state.dashboard_df = create_seed_data()
 
+df = st.session_state.dashboard_df.copy()
 df = add_display_columns(df, as_of_ts)
 
 category_options = sorted(df["Category"].dropna().unique().tolist())
@@ -581,6 +616,8 @@ priority_df = filtered[
     filtered["Urgency Group"].isin(["Overdue", "Due in 7 days", "Due in 30 days"])
 ].copy()
 
+priority_df = priority_df[~priority_df.apply(is_submitted_row, axis=1)].copy()
+
 st.markdown(
     """
     <div class="priority-shell">
@@ -605,29 +642,75 @@ with priority_left:
     else:
         priority_view = priority_df[priority_df["Urgency Group"] == priority_choice].copy()
 
-    priority_cols = [
-        "Opportunity",
-        "Lead",
-        "Partner / Sponsor",
-        "Deadline",
-        "Days to Deadline",
-        "Urgency Group",
-        "Status",
-        "Funding Display",
-    ]
-
     if priority_view.empty:
         st.success("No urgent projects in the current filtered view.")
     else:
-        st.dataframe(
-            priority_view[priority_cols].sort_values(
-                ["Days to Deadline", "Opportunity"],
-                ascending=[True, True],
-                na_position="last",
-            ),
+        editable_priority = priority_view[
+            [
+                "Opportunity",
+                "Lead",
+                "Partner / Sponsor",
+                "Deadline",
+                "Days to Deadline",
+                "Urgency Group",
+                "Status",
+                "Stage",
+                "Category",
+                "Funding Display",
+            ]
+        ].sort_values(
+            ["Days to Deadline", "Opportunity"],
+            ascending=[True, True],
+            na_position="last",
+        ).copy()
+
+        status_choices = sorted(df["Status"].dropna().unique().tolist())
+        stage_choices = sorted(df["Stage"].dropna().unique().tolist())
+        category_choices = sorted(df["Category"].dropna().unique().tolist())
+
+        edited_priority = st.data_editor(
+            editable_priority,
             width="stretch",
             hide_index=True,
+            disabled=[
+                "Opportunity",
+                "Lead",
+                "Partner / Sponsor",
+                "Deadline",
+                "Days to Deadline",
+                "Urgency Group",
+                "Funding Display",
+            ],
+            column_config={
+                "Status": st.column_config.SelectboxColumn(
+                    "Status",
+                    options=sorted(list(set(status_choices + ["Submitted"]))),
+                    required=False,
+                ),
+                "Stage": st.column_config.SelectboxColumn(
+                    "Stage",
+                    options=sorted(list(set(stage_choices + ["Submitted"]))),
+                    required=False,
+                ),
+                "Category": st.column_config.SelectboxColumn(
+                    "Category",
+                    options=sorted(list(set(category_choices + ["Submitted - Awaiting Decision"]))),
+                    required=False,
+                ),
+            },
+            key="priority_editor",
         )
+
+        if st.button("Save urgency updates"):
+            for _, edited_row in edited_priority.iterrows():
+                opp = edited_row["Opportunity"]
+                mask = st.session_state.dashboard_df["Opportunity"] == opp
+                st.session_state.dashboard_df.loc[mask, "Status"] = edited_row["Status"]
+                st.session_state.dashboard_df.loc[mask, "Stage"] = edited_row["Stage"]
+                st.session_state.dashboard_df.loc[mask, "Category"] = edited_row["Category"]
+
+            st.success("Urgency updates saved.")
+            st.rerun()
 
 with priority_right:
     priority_counts = (
@@ -799,8 +882,10 @@ with tab2:
 
     urgency_order = ["Overdue", "Due in 7 days", "Due in 30 days", "Safe", "No deadline"]
 
+    urgency_base = filtered[~filtered.apply(is_submitted_row, axis=1)].copy()
+
     urgency_df = (
-        filtered.groupby("Urgency Group", as_index=False)
+        urgency_base.groupby("Urgency Group", as_index=False)
         .size()
         .rename(columns={"size": "Count"})
     )
@@ -851,9 +936,9 @@ with tab2:
     )
 
     if urgency_choice == "All":
-        urgency_view = filtered.copy()
+        urgency_view = urgency_base.copy()
     else:
-        urgency_view = filtered[filtered["Urgency Group"] == urgency_choice].copy()
+        urgency_view = urgency_base[urgency_base["Urgency Group"] == urgency_choice].copy()
 
     urgency_cols = [
         "Opportunity",
