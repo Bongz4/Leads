@@ -1,22 +1,3 @@
-# import os
-# from datetime import date, datetime
-
-# import altair as alt
-# import pandas as pd
-# import streamlit as st
-# from streamlit_autorefresh import st_autorefresh
-
-# st.set_page_config(
-#     page_title="Leads & Opportunities",
-#     page_icon="📌",
-#     layout="wide",
-#     initial_sidebar_state="expanded",
-# )
-
-# TRACKER_UPDATED = pd.Timestamp("2026-02-24")
-# DEFAULT_AS_OF = date(2026, 3, 8)
-
-# EXCEL_PATH = "projects_tracker_master.xlsx"
 import os
 from datetime import date, datetime
 
@@ -25,6 +6,9 @@ import pandas as pd
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 
+# =========================
+# App configuration
+# =========================
 st.set_page_config(
     page_title="Leads & Opportunities",
     page_icon="📌",
@@ -37,10 +21,13 @@ DEFAULT_AS_OF = date(2026, 3, 8)
 
 EXCEL_PATH = "projects_tracker_master.xlsx"
 SHEET_NAME = "Projects"
+AUTO_REFRESH_MS = 15000
 
-st_autorefresh(interval=15000, key="dashboard_refresh")
+st_autorefresh(interval=AUTO_REFRESH_MS, key="dashboard_refresh")
 
-
+# =========================
+# Seed / file management
+# =========================
 def create_seed_data() -> pd.DataFrame:
     records = [
         {"Project ID": "PRJ-001", "Opportunity": "Amref - resubmitted", "Category": "In Process", "Status": "Through to next round", "Lead": "Go", "Partner / Sponsor": "Amref", "Focus Area": "General", "Submission Date": "2026-01-09", "Deadline": "2026-02-28", "Stage": "In Process", "Funding Amount": 50000, "Funding Currency": "USD", "Notes": "Through to next round.", "Updated At": None, "Updated By": None},
@@ -106,7 +93,7 @@ def ensure_excel_exists(path: str):
 @st.cache_data(ttl=10)
 def load_projects_from_excel(path: str) -> pd.DataFrame:
     try:
-        df = pd.read_excel(path, sheet_name=SHEET_NAME, header=1)
+        df = pd.read_excel(path, sheet_name=SHEET_NAME, header=0)
     except PermissionError:
         st.error("The Excel file is locked. Close it in Excel, then refresh.")
         return create_seed_data()
@@ -168,16 +155,43 @@ def update_projects_in_excel(path: str, edited_rows: pd.DataFrame, updated_by: s
     save_projects_to_excel(current_df, path)
     load_projects_from_excel.clear()
 
-
+# =========================
+# Business logic helpers
+# =========================
 def fmt_money(amount: float, currency: str) -> str:
     if pd.isna(amount):
         return "Not stated"
-    symbol = {"USD": "$", "EUR": "€", "ZAR": "R"}.get(currency, "")
+    symbol = {"USD": "$", "EUR": "€", "ZAR": "R"}.get(str(currency), "")
     if amount >= 1_000_000:
         return f"{symbol}{amount / 1_000_000:.1f}M"
     if amount >= 1_000:
         return f"{symbol}{amount / 1_000:.0f}K"
     return f"{symbol}{amount:,.0f}"
+
+
+def mixed_currency_summary(df: pd.DataFrame) -> str:
+    if df.empty or "Funding Amount" not in df.columns:
+        return "No known funding values."
+
+    work = df[["Funding Currency", "Funding Amount"]].copy()
+    work["Funding Amount"] = pd.to_numeric(work["Funding Amount"], errors="coerce")
+    work = work.dropna(subset=["Funding Amount"])
+
+    if work.empty:
+        return "No known funding values."
+
+    grouped = (
+        work.groupby("Funding Currency", dropna=False)["Funding Amount"]
+        .sum()
+        .reset_index()
+        .sort_values("Funding Amount", ascending=False)
+    )
+
+    parts = []
+    for _, row in grouped.iterrows():
+        currency = str(row["Funding Currency"]) if pd.notna(row["Funding Currency"]) else "Unknown"
+        parts.append(fmt_money(row["Funding Amount"], currency))
+    return " | ".join(parts)
 
 
 def status_tone(status: str) -> str:
@@ -237,6 +251,51 @@ def is_submitted_row(row) -> bool:
     return "submitted" in status or "submitted" in stage or "submitted" in category
 
 
+def is_submitted_or_awaiting_row(row) -> bool:
+    text = " ".join(
+        [
+            str(row.get("Category", "")),
+            str(row.get("Stage", "")),
+            str(row.get("Status", "")),
+        ]
+    ).strip().lower()
+
+    keywords = [
+        "submitted",
+        "awaiting",
+        "decision",
+        "review comments addressed",
+        "waiting on",
+        "budget submitted",
+        "submitted on our behalf",
+    ]
+    return any(k in text for k in keywords)
+
+
+def submitted_bucket(row) -> str:
+    text = " ".join(
+        [
+            str(row.get("Category", "")),
+            str(row.get("Stage", "")),
+            str(row.get("Status", "")),
+        ]
+    ).strip().lower()
+
+    if "awaiting" in text or "waiting on" in text:
+        return "Awaiting decision"
+    if "review comments addressed" in text:
+        return "Review comments addressed"
+    if "budget submitted" in text:
+        return "Budget submitted"
+    if "submitted on our behalf" in text:
+        return "Submitted on behalf"
+    if "submitted" in text:
+        return "Submitted"
+    if "decision" in text:
+        return "Decision stage"
+    return "Other submitted"
+
+
 def add_display_columns(df: pd.DataFrame, as_of_ts: pd.Timestamp) -> pd.DataFrame:
     out = df.copy()
 
@@ -293,7 +352,9 @@ def ensure_urgency_columns(df: pd.DataFrame, as_of_ts: pd.Timestamp) -> pd.DataF
         out["Stage"] = ""
     return add_display_columns(out, as_of_ts)
 
-
+# =========================
+# Chart helpers
+# =========================
 def styled_bar(data, y_field, x_field, title, color="#0F62FE", height=300):
     if data.empty:
         data = pd.DataFrame({y_field: ["None"], x_field: [0]})
@@ -304,9 +365,9 @@ def styled_bar(data, y_field, x_field, title, color="#0F62FE", height=300):
         tooltip=[y_field, x_field],
     )
     bars = base.mark_bar(cornerRadiusTopRight=8, cornerRadiusBottomRight=8, color=color)
-    labels = base.mark_text(
-        align="left", baseline="middle", dx=6, fontWeight="bold", color="#0f172a"
-    ).encode(text=f"{x_field}:Q")
+    labels = base.mark_text(align="left", baseline="middle", dx=6, fontWeight="bold", color="#0f172a").encode(
+        text=f"{x_field}:Q"
+    )
     return (bars + labels).properties(title=title, height=height)
 
 
@@ -324,13 +385,27 @@ def styled_column(data, x_field, y_field, title, color="#14B8A6", height=320):
     return (bars + labels).properties(title=title, height=height)
 
 
+def currency_value_chart(data: pd.DataFrame, title: str, height: int = 320):
+    if data.empty:
+        data = pd.DataFrame({"Bucket": ["None"], "Funding Currency": ["Unknown"], "Total_Value": [0]})
+
+    return alt.Chart(data).mark_bar(cornerRadiusTopLeft=8, cornerRadiusTopRight=8).encode(
+        x=alt.X("Bucket:N", title=None, sort="-y"),
+        y=alt.Y("Total_Value:Q", title="Total value"),
+        color=alt.Color("Funding Currency:N", title="Currency"),
+        tooltip=["Bucket", "Funding Currency", "Total_Value"],
+    ).properties(title=title, height=height)
+
+
 def category_color_scale():
     return alt.Scale(
         domain=["In Process", "New Opportunity", "Submitted - Awaiting Decision", "Recent Decision"],
         range=["#2563EB", "#14B8A6", "#F59E0B", "#DC2626"],
     )
 
-
+# =========================
+# Styles
+# =========================
 st.markdown(
     """
     <style>
@@ -354,7 +429,7 @@ st.markdown(
         padding-bottom: 2rem;
         padding-left: 2rem;
         padding-right: 2rem;
-        max-width: 1580px;
+        max-width: 1600px;
     }
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
@@ -476,6 +551,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# =========================
+# App start
+# =========================
 ensure_excel_exists(EXCEL_PATH)
 
 st.markdown(
@@ -484,7 +562,7 @@ st.markdown(
         <div style="display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap;">
             <div>
                 <h1>Leads & Opportunities</h1>
-                <p>Funding pipeline, sponsors, deadlines, and actions in one executive view.</p>
+                <p>Funding pipeline, sponsors, deadlines, submissions, and action tracking in one executive dashboard.</p>
             </div>
             <div style="text-align:right;min-width:220px;">
                 <div style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.75;">Tracker updated</div>
@@ -567,25 +645,30 @@ elif sort_mode == "Lead":
 
 filtered = ensure_urgency_columns(filtered, as_of_ts)
 
+# =========================
+# KPI strip
+# =========================
 total_opps = len(filtered)
 in_process = int((filtered["Category"] == "In Process").sum())
 new_opps = int((filtered["Category"] == "New Opportunity").sum())
 awaiting = int((filtered["Category"] == "Submitted - Awaiting Decision").sum())
 critical_7 = int(filtered["Days to Deadline"].between(0, 7, inclusive="both").sum())
 due_30 = int(filtered["Days to Deadline"].between(0, 30, inclusive="both").sum())
-known_funding = filtered["Funding Amount"].sum(min_count=1)
 
 k1, k2, k3, k4, k5, k6 = st.columns(6)
 k1.metric("Total", total_opps)
 k2.metric("In Process", in_process)
 k3.metric("New", new_opps)
-k4.metric("Awaiting", awaiting)
+k4.metric("Submitted / Awaiting", awaiting)
 k5.metric("Due in 7 Days", critical_7)
 k6.metric("Due in 30 Days", due_30)
 
-if pd.notna(known_funding):
-    st.caption(f"Known funding in current view: {fmt_money(known_funding, 'USD')}+ across mixed currencies")
+funding_summary_text = mixed_currency_summary(filtered)
+st.caption(f"Known funding in current view: {funding_summary_text}")
 
+# =========================
+# Executive cards
+# =========================
 upcoming = filtered[filtered["Days to Deadline"] >= 0].sort_values("Deadline")
 next_deadline_card = "None in current view"
 if not upcoming.empty:
@@ -611,6 +694,7 @@ with exec_left:
         """,
         unsafe_allow_html=True,
     )
+
 with exec_mid:
     st.markdown(
         f"""
@@ -626,6 +710,7 @@ with exec_mid:
         """,
         unsafe_allow_html=True,
     )
+
 with exec_right:
     st.markdown(
         f"""
@@ -641,6 +726,9 @@ with exec_right:
         unsafe_allow_html=True,
     )
 
+# =========================
+# Quick insight cards
+# =========================
 quick1, quick2, quick3 = st.columns(3)
 
 with quick1:
@@ -678,6 +766,9 @@ with quick3:
     ) or "<div class='quick-meta'>No flagged actions.</div>"
     st.markdown(f"<div class='mini-card'><div class='section-title'>Action list</div>{items}</div>", unsafe_allow_html=True)
 
+# =========================
+# Priority action section
+# =========================
 priority_df = filtered[
     filtered["Urgency Group"].isin(["Overdue", "Due in 7 days", "Due in 30 days"])
 ].copy()
@@ -837,6 +928,9 @@ with priority_right:
         width="stretch",
     )
 
+# =========================
+# Analytics tabs
+# =========================
 st.markdown("### Portfolio analytics")
 
 tab1, tab2, tab3 = st.tabs(["Overview", "Deadlines", "Portfolio"])
@@ -900,6 +994,101 @@ with tab1:
         st.altair_chart(
             styled_bar(lead_df, "Lead", "Count", "Top leads", color="#7C3AED", height=330),
             width="stretch",
+        )
+
+    st.markdown("### Submitted / Awaiting decision")
+
+    submitted_df = filtered[filtered.apply(is_submitted_or_awaiting_row, axis=1)].copy()
+
+    if submitted_df.empty:
+        st.info("No submitted or awaiting-decision projects in the current filtered view.")
+    else:
+        submitted_df["Submitted Bucket"] = submitted_df.apply(submitted_bucket, axis=1)
+        submitted_df["Funding Amount"] = pd.to_numeric(submitted_df["Funding Amount"], errors="coerce").fillna(0)
+
+        submitted_summary = (
+            submitted_df.groupby("Submitted Bucket", as_index=False)
+            .agg(
+                Project_Count=("Project ID", "count"),
+                Total_Value=("Funding Amount", "sum"),
+            )
+            .sort_values("Project_Count", ascending=False)
+        )
+
+        submitted_value_currency = (
+            submitted_df.groupby(["Submitted Bucket", "Funding Currency"], as_index=False)["Funding Amount"]
+            .sum()
+            .rename(columns={"Submitted Bucket": "Bucket", "Funding Amount": "Total_Value"})
+        )
+
+        s1, s2 = st.columns(2)
+
+        with s1:
+            count_chart = alt.Chart(submitted_summary).mark_bar(
+                cornerRadiusTopLeft=8,
+                cornerRadiusTopRight=8
+            ).encode(
+                x=alt.X("Submitted Bucket:N", sort="-y", title=None),
+                y=alt.Y("Project_Count:Q", title="Projects"),
+                tooltip=["Submitted Bucket", "Project_Count", "Total_Value"],
+                color=alt.Color("Submitted Bucket:N", legend=None),
+            )
+
+            count_text = alt.Chart(submitted_summary).mark_text(
+                dy=-10,
+                fontWeight="bold",
+                color="#0f172a"
+            ).encode(
+                x=alt.X("Submitted Bucket:N", sort="-y"),
+                y=alt.Y("Project_Count:Q"),
+                text="Project_Count:Q",
+            )
+
+            st.altair_chart(
+                (count_chart + count_text).properties(
+                    title="Number of submitted / awaiting projects",
+                    height=320
+                ),
+                width="stretch",
+            )
+
+        with s2:
+            st.altair_chart(
+                currency_value_chart(
+                    submitted_value_currency,
+                    "Monetary value of submitted / awaiting projects",
+                    height=320
+                ),
+                width="stretch",
+            )
+
+        total_submitted_projects = int(submitted_summary["Project_Count"].sum())
+        submitted_funding_text = mixed_currency_summary(submitted_df)
+
+        m1, m2 = st.columns(2)
+        m1.metric("Submitted / awaiting projects", total_submitted_projects)
+        m2.metric("Submitted / awaiting value", submitted_funding_text)
+
+        st.markdown("#### Submitted project list")
+        submitted_display_cols = [
+            "Project ID",
+            "Opportunity",
+            "Submitted Bucket",
+            "Category",
+            "Stage",
+            "Status",
+            "Lead",
+            "Partner / Sponsor",
+            "Funding Display",
+        ]
+        available_submitted_cols = [c for c in submitted_display_cols if c in submitted_df.columns]
+        st.dataframe(
+            submitted_df[available_submitted_cols].sort_values(
+                ["Submitted Bucket", "Opportunity"],
+                ascending=[True, True]
+            ),
+            width="stretch",
+            hide_index=True,
         )
 
 with tab2:
@@ -1037,16 +1226,26 @@ with tab2:
         "Funding Display",
     ]
 
+    available_urgency_cols = [col for col in urgency_cols if col in urgency_view.columns]
+    sort_cols = [col for col in ["Days to Deadline", "Opportunity"] if col in urgency_view.columns]
+
     st.markdown("#### Projects in selected urgency group")
-    st.dataframe(
-        urgency_view[urgency_cols].sort_values(
-            ["Days to Deadline", "Opportunity"],
-            ascending=[True, True],
-            na_position="last",
-        ),
-        width="stretch",
-        hide_index=True,
-    )
+
+    if urgency_view.empty:
+        st.info("No projects in this urgency group.")
+    else:
+        urgency_display = urgency_view[available_urgency_cols].copy() if available_urgency_cols else urgency_view.copy()
+        if sort_cols:
+            urgency_display = urgency_display.sort_values(
+                sort_cols,
+                ascending=[True] * len(sort_cols),
+                na_position="last",
+            )
+        st.dataframe(
+            urgency_display,
+            width="stretch",
+            hide_index=True,
+        )
 
 with tab3:
     st.markdown("#### Portfolio table")
@@ -1101,6 +1300,9 @@ with tab3:
             st.write(f"**Updated At:** {row['Updated At']}")
             st.write(f"**Updated By:** {row['Updated By']}")
 
+# =========================
+# Export
+# =========================
 st.markdown("### Export")
 export_df = filtered.copy()
 export_df["Submission Date"] = export_df["Submission Date"].astype(str)
@@ -1125,8 +1327,7 @@ with st.expander("How this live Excel version works"):
 - `{SHEET_NAME}`
 
 **Excel structure expected**
-- Row 1: title row
-- Row 2: actual headers
+- Row 1: actual headers
 
 **Required columns**
 - Project ID
@@ -1149,6 +1350,7 @@ with st.expander("How this live Excel version works"):
 - The app reads from the Excel file
 - Urgency updates save back into Excel
 - Submitted projects are removed from urgency
+- Submitted / awaiting analytics use category, stage, and status signals
 - The dashboard refreshes every 15 seconds
 """
     )
